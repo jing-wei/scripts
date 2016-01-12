@@ -81,20 +81,34 @@ ggplot(df, aes(x=Year, y=PercentageOfSales, fill=OperatingMarginOrExpense)) +
 
 Sales
 ```{r}
-# do sales
+# Clean data
+# replace the first row with c("Date", 2005:2014, "TTM")
+financials[1,] <- c("Date", 2005:2014, "TTM")
+
+# row names to column 1
+row.names(financials) <- financials[,1]
+
+# remove the first column
+financials <- financials[, -1]
+
+# column names to the first row
+colnames(financials) <- financials[1,]
+
+# remove the 1st row
+financials <- financials[-1,]
 # remove last column of financials
 financials <- financials[,1:10]
-financials
+
 # create a df2
 df2 <- matrix(0, nrow=10, ncol=2)
 df2 <- data.frame(df2)
 # fill in df2 with sales data
 df2[,2] <- as.character(financials[1,])
 df2[,1] <- colnames(financials)
-df2
+
 # add colnames
 colnames(df2) <- c("Year", "Sales")
-df2
+
 # add group=1 for factor type
 ggplot(df2, aes(x=Year, y=Sales, group=1)) + geom_line()
 ```
