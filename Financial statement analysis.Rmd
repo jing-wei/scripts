@@ -1,0 +1,171 @@
+---
+title: "Financial_statement_analysis_with_Morningstar_data"
+output: html_document
+---
+Export key ratios of Johnson & Johnson from Morningstar(http://financials.morningstar.com/ratios/r.html?t=JNJ)
+Read the morning star data
+
+```{r}
+dat <- read.table(file="JNJ Key Ratios.csv", header=F, sep=',', 
+                     dec = '.', stringsAsFactors=F, quote = "\"" , 
+                     fill = TRUE , skip = 2)
+```
+
+The structure of the key ratio data. 
+
+```{r}
+str(dat)
+```
+
+Extract different sections of the financial data. 
+This could apply to financial data of other companies on Morningstar. 
+```{r}
+financials <- dat[1:16, ]
+profitability <- dat[c(18:27, 29:36),]
+revenue <- dat[c(38, 40:48),]
+net_income <- dat[c(38, 50:53),]
+eps <- dat[c(38, 55:58),]
+cash_flow <- dat[c(60:65),]
+financial_health <- dat[c(67:92),]
+efficiency_ratios <- dat[c(94:102),]
+```
+
+Clean up the profitability section. 
+```{r}
+# replace 1st row
+profitability[1,] <- c("Date", 2005:2014, "TTM")
+row.names(profitability) <- profitability[,1]
+profitability <- profitability[,-1]
+colnames(profitability) <- profitability[1,]
+profitability <- profitability[-1,]
+# remove the last column of TTM
+profitability <- profitability[, 1:10]
+```
+
+Reorganize the data to make stacked area graph. 
+```{r}
+
+profitability[1:8,]
+m <- matrix(0, nrow=50, ncol=3)
+df <- data.frame(m)
+colnames(df) <- c("Year", "OperatingMarginOrExpense", "PercentageOfSales")
+# Force type to be character
+df <- data.frame("Year"=numeric(50), "OperatingMarginOrExpense"=character(50), "PercentageOfSales"=numeric(50))
+
+# add the first column "Year"
+year <- sapply(2005:2014, function(x){rep(x, 5)})
+year[1:length(year)]
+df[,"Year"] <- year[1:length(year)]
+# fill the 2nd column
+df[,2] <- rep(c("COGS", "SG&A", "R&D", "Other", "Operating Margin"), 10)
+df[,2]
+# last column
+temp <- vector()
+PercentageOfSales <- sapply(1:10, function(x) {temp <- c(temp, profitability[c(2,4,5,6,7), x])})
+df[,3] <- as.numeric(PercentageOfSales)
+# Replace the NA with 0
+df[is.na(df)] <- 0
+```
+
+Now, we can plot. 
+First, the stacked area figure for different expenses. It shows the relative 
+proportion of those expenses. 
+```{r}
+library(ggplot2)
+ggplot(df, aes(x=Year, y=PercentageOfSales, fill=OperatingMarginOrExpense)) + 
+        geom_area(colour="black", size=0.2, alpha=0.5) + 
+        scale_x_continuous(breaks= c(2005:2014), limits=c(2005, 2014)) + 
+        xlab("Year") + ylab("% of Sales")
+```
+
+
+Sales
+```{r}
+# do sales
+# remove last column of financials
+financials <- financials[,1:10]
+financials
+# create a df2
+df2 <- matrix(0, nrow=10, ncol=2)
+df2 <- data.frame(df2)
+# fill in df2 with sales data
+df2[,2] <- as.character(financials[1,])
+df2[,1] <- colnames(financials)
+df2
+# add colnames
+colnames(df2) <- c("Year", "Sales")
+df2
+# add group=1 for factor type
+ggplot(df2, aes(x=Year, y=Sales, group=1)) + geom_line()
+```
+
+```{r}
+# plot stacked bar figure of operating cash flow, including cap spending 
+# free cash flow
+# data already cleaned as above
+
+# extract data for the plot
+
+df3 <- financials[12:13,]
+
+# add a row with year
+df3 <- rbind(as.numeric(colnames(df3)), df3)
+# rename rows
+rownames(df3) <- c("Year", "Capital_Spending", "Free_Cash_Flow")
+
+# Transpose
+df3 <- t(df3)
+
+# transform data type to numeric first
+(df3 <- gsub(",", "", df3))
+# negateive to positive
+df3 <- gsub("-", "", df3)
+# transform into data frame
+df3 <- data.frame(df3)
+# remove the last row
+df3 <- df3[1:10,]
+# melt the data frame
+library(reshape)
+?melt
+df4 <- melt(df3, id.vars="Year", measure.vars=c("Capital_Spending", "Free_Cash_Flow"), variable_name="Type")
+
+# rename col3 into 
+colnames(df4)[3] <- "Operating_Cash_Flow"
+# change to numeric, to avoid discrete y ticks
+df4$Operating_Cash_Flow <- as.numeric(as.character(df4[,3]))
+
+# let's do the stacked bar plot
+ggplot(df4, aes(y=Operating_Cash_Flow, x=Year, fill=Type)) +
+        geom_bar(stat="identity") +
+        guides(fill=guide_legend(reverse=TRUE)) + 
+        ylab("Operating Cash Flow (Millions)")
+        #theme(axis.text.y=element_blank()) +
+        #scale_y_discrete(limits=)
+```
+
+Liquidation ratios
+```{r}
+# liquidity ratios
+# in financial_health
+
+df5 <- financial_health[22:26,]        
+df5 <- as.data.frame(t(df5))
+colnames(df5) <- c("Year", "CurrentRatio", "QuickRatio", "FinancialLeverage", "DebtToEquity")
+# remove first row
+df5 <- df5[-1,]
+
+# melt df5 for ggplot
+df6 <- melt(df5, id.vars="Year", measure.vars=c("CurrentRatio", "QuickRatio", "FinancialLeverage", "DebtToEquity"), 
+            variable_names="Ratios")
+# change to numeric, to avoid discrete y ticks
+df6$value <- as.numeric(as.character(df6$value))
+
+# multiple bar plot
+ggplot(df6, aes(x=Year, y=value, fill=variable)) + 
+        geom_bar(position="dodge", stat="identity") +
+        theme(axis.text.x = element_text(angle=30))
+        #theme(axis.title.x=element_text(angle=45))
+```
+
+
+The whole process could be automated if we export data directly from the website, without downloading the .csv file locally. 
