@@ -45,7 +45,6 @@ profitability <- profitability[, 1:10]
 Reorganize the data to make stacked area graph. 
 ```{r}
 
-profitability[1:8,]
 m <- matrix(0, nrow=50, ncol=3)
 df <- data.frame(m)
 colnames(df) <- c("Year", "OperatingMarginOrExpense", "PercentageOfSales")
@@ -54,11 +53,11 @@ df <- data.frame("Year"=numeric(50), "OperatingMarginOrExpense"=character(50), "
 
 # add the first column "Year"
 year <- sapply(2005:2014, function(x){rep(x, 5)})
-year[1:length(year)]
+
 df[,"Year"] <- year[1:length(year)]
 # fill the 2nd column
 df[,2] <- rep(c("COGS", "SG&A", "R&D", "Other", "Operating Margin"), 10)
-df[,2]
+
 # last column
 temp <- vector()
 PercentageOfSales <- sapply(1:10, function(x) {temp <- c(temp, profitability[c(2,4,5,6,7), x])})
