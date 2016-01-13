@@ -6,7 +6,7 @@ output: html_document
 Read the data for baloon plot. The data was exported after gene set enrichment analysis (http://software.broadinstitute.org/gsea/index.jsp). There are three variables: NAME (names of gene sets), NES (normalized enrichment score), and sig_genes (number of genes significantly changes in corresponding gene sets).  
 
 ```{r}
-dt <- read.csv("data_for_baloon_plot.csv")
+dt <- read.csv("data_for_balloon_plot.csv")
 head(dt)
 ```
 
@@ -24,19 +24,19 @@ p
 Color baloons according to p values
 Mark red if p value < 0.1
 ```{r}
-dt2 <- read.csv("data_for_baloon_plot_p_val.csv")
+dt2 <- read.csv("data_for_balloon_plot_p_val.csv")
 # Add color info
 col <- vector()
-for (i in 1:length(gsea2[,1])) {
-        if (gsea2$NOM.p.val[i] <= 0.1) {
+for (i in 1:length(dt2[,1])) {
+        if (dt2$NOM.p.val[i] <= 0.1) {
                 col[i] <- 1
         }
         else {col[i] <- 3}
 }
-# Add col column to bub_dt2
+# Add col column to dt2
 dt2$color <- col
 # remove "HALLMARK_" in names
-dt2$NAME <- gsub("^.*?_","",bub_dt2[,1])
+dt2$NAME <- gsub("^.*?_","",dt2[,1])
 
 # plot again
 p <- ggplot(dt2, aes(x=NES, y=NAME, size=sig_genes, colour=color, fill=color)) + 
