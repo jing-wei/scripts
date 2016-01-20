@@ -2,6 +2,11 @@
 title: "Financial_statement_analysis_with_Morningstar_data"
 output: html_document
 ---
+---
+Here I show how to pull and plot financial data from morningstar. 
+This can be applied to other companies on morningstar
+---
+
 Export key ratios of Johnson & Johnson from Morningstar(http://financials.morningstar.com/ratios/r.html?t=JNJ)
 Read the morning star data
 
