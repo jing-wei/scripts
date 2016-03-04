@@ -1,0 +1,31 @@
+#movies	220 rows
+#id	INTEGER
+#name	TEXT
+#genre	TEXT
+#year	INTEGER
+#imdb_rating	REAL
+
+
+select distinct year from movies;
+select distinct year from movies order by year asc;
+select * from movies where genre = 'drama';
+select * from movies where name like '%bride%';
+select * from movies where year between 2000 and 2015;
+select * from movies where year = 1995 and imdb_rating = 9;
+select name, imdb_rating from movies where year > 2009 order by name asc;
+select * from movies where imdb_rating = 7 limit 3;
+select * from movies where imdb_rating > 6 and genre = 'comedy' and year > 1995 order by imdb_rating desc;
+select * from movies where name = 'Cast Away';
+select * from movies where imdb_rating != 7;
+select * from movies where genre = 'horror' and imdb_rating < 6;
+select * from movies where imdb_rating > 8 order by genre;
+select * from movies where name like '%King%';
+select * from movies where name like '%out';
+select * from movies where name like 'The%' order by imdb_rating desc;
+select * from movies;
+select name, id from movies where id > 125;
+select * from movies where name like 'X-men%';
+select * from movies order by name desc limit 10;
+select id, name, genre from movies where genre = 'romance';
+select * from movies where name like '%twilight%' order by year asc;
+select * from movies where year = 2012 and genre = 'comedy';
