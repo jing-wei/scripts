@@ -83,3 +83,64 @@ i <- ms1[which(rtsel)][1]
 j <- ms1[which(rtsel)][2]
 M2 <- MSmap(ms, i:j, 100, 1000, 1, hd)
 plot3D(M2)
+
+################
+# Handling identificatino data
+#############
+# The RforProteomics package distributes a small identification result 
+# file (see ?TMT_Erwinia_1uLSike_Top10HCD_isol2_45stepped_60min_01.mzid) 
+# that we load and parse using infrastructure from the mzID package
+library("mzID")
+f <- dir(system.file("extdata", package = "RforProteomics"),
+         pattern = "mzid", full.names=TRUE)
+#
+str(f)
+# chr "/Users/jingwei/Library/R/3.2/library/RforProteomics/extdata/TMT_Erwinia.mzid.gz"
+basename(f)
+# Read id
+id <- mzID(f)
+# a mzID object
+# a lot of information! 
+id
+str(id)
+
+# Various data can be extracted from the mzID object, using one the accessor 
+# functions such as database, scans, peptides, … The object can also be 
+# converted into a data.frame using the flatten function.
+# The mzR package also provides support fast parsing mzIdentML files with 
+# the openIDfile function
+
+library("mzR")
+# f from above
+id1 <- openIDfile(f)
+fid1 <- mzR::psms(id1)
+
+head(fid1)
+
+########
+# MS/MS database search
+########
+# Searches are generally done without R using other softwares
+# However, it can be done in R
+library("rTANDEM")
+?rtandem
+library("shinyTANDEM")
+?shinyTANDEM
+
+fas <- pxget(px, pxfiles(px)[10])
+str(fas)
+
+# search using the MSGF+ engine
+library("MSGFplus")
+msgfpar <- msgfPar(database = fas,
+                   instrument = 'HighRes',
+                   tda = TRUE,
+                   enzyme = 'Trypsin',
+                   protocol = 'iTRAQ')
+idres <- runMSGF(msgfpar, mzf, memory=1000)
+# idres is a mzID object
+# identification files
+basename(mzID::files(idres)$id)
+# There can be graphical user interface too
+# library("MSGFgui")
+# MSGFgui()
