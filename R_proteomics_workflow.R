@@ -144,3 +144,49 @@ basename(mzID::files(idres)$id)
 # There can be graphical user interface too
 # library("MSGFgui")
 # MSGFgui()
+
+########
+# Analyze search results
+#######
+# One starts with the construction of an MSnID object that is populated 
+# with identification results that can be imported from a data.frame or 
+# from mzIdenML files
+library(MSnID)
+# A directory holding cache files is created
+msnid <- MSnID(".")
+#Note, the anticipated/suggested columns in the
+#peptide-to-spectrum matching results are:
+#        -----------------------------------------------
+#        accession
+#calculatedMassToCharge
+#chargeState
+#experimentalMassToCharge
+#isDecoy
+#peptide
+#spectrumFile
+#spectrumID
+str(msnid)
+msnid <- read_mzIDs(msnid,
+                    basename(mzID::files(idres)$id))
+show(msnid)
+# The package then enables to define, optimise and apply filtering based 
+# for example on missed cleavages, identification scores, precursor mass 
+# errors, etc. and assess PSM, peptide and protein FDR levels
+msnid <- correct_peak_selection(msnid)
+msnid$msmsScore <- -log10(msnid$`MS-GF:SpecEValue`)
+msnid$absParentMassErrorPPM <- abs(mass_measurement_error(msnid))
+
+filtObj <- MSnIDFilter(msnid)
+filtObj$absParentMassErrorPPM <- list(comparison="<", threshold=5.0)
+filtObj$msmsScore <- list(comparison=">", threshold=8.0)
+filtObj
+
+evaluate_filter(msnid, filtObj)
+# FDR around 0.05
+
+# Optimize filter to lower FDR
+# Lower literation from 50000 to 500
+filtObj.grid <- optimize_filter(filtObj, msnid, fdr.max=0.01,
+                                method="Grid", level="PSM",
+                                n.iter=500)
+filtObj.grid
