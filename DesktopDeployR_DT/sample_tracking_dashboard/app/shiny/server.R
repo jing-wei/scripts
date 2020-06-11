@@ -491,10 +491,7 @@ server = function(input, output, session) {
   #observeEvent(input$generateDashboard, {
   #  summary_dir <- input$Data_Location_Dashboard
   #  dashboardData <- fread(file = file.path(summary_dir, "summary", "Sample_Summary.csv"))
-  #  output$sampleReceivedDaily <- dashboardData %>% 
-  #    separate(`Reception Date & Time                                        (YYYY-MM-DD; hh:mm)`, c("Reception_Day", "Reception_Time"), "; ") %>% 
-  #    group_by(Reception_Day) %>% 
-  #    summarize(Samples_Received = n())
+  #  output$sampleReceivedDaily <- dashboardData # to add analysis
   #})
   
   ####
