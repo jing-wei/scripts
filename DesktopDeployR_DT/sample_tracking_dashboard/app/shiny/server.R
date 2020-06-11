@@ -100,18 +100,7 @@ server = function(input, output, session) {
     inFile <- input$interpretive$datapath
     inFileName = input$interpretive$name
     #
-    out <- suppressWarnings(read_csv(inFile, skip = 12) %>% 
-                              filter(! is.na(`Batch ID`))) %>% 
-      mutate(`Well` = str_replace_all(`Well`, "A0", "A"), 
-             `Well` = str_replace_all(`Well`, "B0", "B"), 
-             `Well` = str_replace_all(`Well`, "C0", "C"), 
-             `Well` = str_replace_all(`Well`, "D0", "D"), 
-             `Well` = str_replace_all(`Well`, "E0", "E"), 
-             `Well` = str_replace_all(`Well`, "F0", "F"), 
-             `Well` = str_replace_all(`Well`, "G0", "G"), 
-             `Well` = str_replace_all(`Well`, "H0", "H") ) %>% 
-      mutate(`#Interpretive` = inFileName) %>% 
-      mutate(`#Plate` = tolower(substr(`Batch ID`, 1, 11)))
+    out <- read_csv(inFile) # adjust for your input file
     return(out)
   }
   
@@ -449,12 +438,12 @@ server = function(input, output, session) {
     
     sampleSummary <- receptionData  %>% 
       full_join(runData, 
-                by=c("Sample ID \r\n400 Samples Max"="Sample ID",
+                by=c("Sample ID"="Sample ID",
                      "Site ID"="Site ID")) %>% 
       left_join(disposalData, 
-                by=c("Sample ID \r\n400 Samples Max"="Disposal Sample ID")) %>% 
+                by=c("Sample ID"="Disposal Sample ID")) %>% 
       left_join(returnData, 
-                by = c("Sample ID \r\n400 Samples Max"="Returned Sample ID"))
+                by = c("Sample ID"="Returned Sample ID"))
     
     
     output$sampleSummaryTbl <- renderDT(
